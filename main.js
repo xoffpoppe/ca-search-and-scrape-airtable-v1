@@ -95,17 +95,25 @@ try {
     const page = await context.newPage();
 
     // Login to Vistage
-    console.log('Logging in to Vistage...');
-    await page.goto('https://app.vistage.com/login');
-    await page.fill('input[name="username"]', vistage_username);
-    await page.fill('input[name="password"]', vistage_password);
-    await page.click('button[type="submit"]');
+    console.log('Navigating to Vistage login page...');
+    await page.goto('https://app.vistage.com/chairapp/Login');
     await page.waitForLoadState('networkidle');
+
+    console.log('Entering credentials...');
+    await page.fill('input[name="loginPage:loginForm:loginUsername"]', vistage_username);
+    await page.fill('input[name="loginPage:loginForm:loginPassword"]', vistage_password);
+
+    console.log('Clicking login button...');
+    await page.click('input[name="loginPage:loginForm:login-submit"]');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
 
     // Check if login was successful
     const currentUrl = page.url();
-    if (currentUrl.includes('/login')) {
-        throw new Error('Login failed - check credentials');
+    console.log(`After login, current URL: ${currentUrl}`);
+
+    if (currentUrl.includes('Login')) {
+        throw new Error('Login failed - still on login page. Check credentials.');
     }
 
     console.log('Login successful');
