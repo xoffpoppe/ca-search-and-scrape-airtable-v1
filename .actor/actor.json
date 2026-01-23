@@ -7,6 +7,6 @@
   "meta": {
     "templateId": "node-playwright"
   },
-  "input": "./.actor/input_schema.json",
+  "input": "./input_schema.json",
   "dockerfile": "./Dockerfile"
 }
