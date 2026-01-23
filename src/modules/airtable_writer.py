@@ -51,8 +51,7 @@ class AirtableWriter:
     async def write_search_start(self) -> None:
         """Write initial status when search starts."""
         fields = {
-            'Notepad': '⏳ CA Search in progress...',
-            'CA Search Notes': f'Search started\n\nSearching Vistage database...'
+            'CA Search Notes': '⏳ CA Search in progress...\n\nSearching Vistage database...'
         }
         await self.update_record(fields)
 
@@ -63,28 +62,28 @@ class AirtableWriter:
         Args:
             result: The output dictionary from the actor
         """
-        notepad = ''
-        ca_search_notes = ''
+        fields = {}
 
         if not result.get('match_found'):
             # No match found
-            notepad = '❌ No match found'
-            ca_search_notes = self._format_no_match(result)
+            fields['CA Search Notes'] = self._format_no_match(result)
         else:
-            # Match found
-            notepad, ca_search_notes = self._format_match_found(result)
+            # Match found - build fields
+            ca_search_notes, ca_url, ca_status = self._format_match_found(result)
+            fields['CA Search Notes'] = ca_search_notes
 
-        fields = {
-            'Notepad': notepad,
-            'CA Search Notes': ca_search_notes
-        }
+            # Only add CA URL and Status if high confidence (≥70%)
+            if result.get('confidence') == 'high':
+                if ca_url:
+                    fields['CA URL Possible Match'] = ca_url
+                if ca_status:
+                    fields['CA Possible Status'] = ca_status
 
         await self.update_record(fields)
 
     async def write_error(self, error_message: str) -> None:
         """Write error message to Airtable."""
         fields = {
-            'Notepad': f'❌ Error: {error_message}',
             'CA Search Notes': f'❌ Error occurred during search/scrape\n\n{error_message}'
         }
         await self.update_record(fields)
@@ -109,19 +108,18 @@ class AirtableWriter:
         return notes
 
     def _format_match_found(self, result: Dict[str, Any]) -> tuple:
-        """Format output for match found (with or without scrape)."""
+        """
+        Format output for match found (with or without scrape).
+
+        Returns:
+            (ca_search_notes, ca_url, ca_status) tuple
+        """
         confidence = result.get('confidence', 'needs_review')
         match_score = result.get('match_score', 0)
         auto_scraped = result.get('auto_scraped', False)
 
         # Status icon
         status_icon = '✅' if confidence == 'high' else '⚠️'
-
-        # Notepad (simple summary)
-        notepad = f'{status_icon} Match found ({match_score}%)'
-        if auto_scraped:
-            notepad += ' + Profile scraped'
-        notepad += '\nSee CA Search Notes for details'
 
         # CA Search Notes (detailed)
         status_text = 'MATCH FOUND' if confidence == 'high' else 'MATCH FOUND - NEEDS REVIEW'
@@ -164,7 +162,15 @@ class AirtableWriter:
         else:
             notes += '\n'
 
-        return notepad, notes
+        # Extract CA URL (Salesforce URL)
+        ca_url = metadata.get('salesforce_url', None)
+
+        # Extract CA Possible Status from scrape_data (only if scraped)
+        ca_status = None
+        if auto_scraped and result.get('scrape_data'):
+            ca_status = result['scrape_data'].get('proposed ca status', None)
+
+        return notes, ca_url, ca_status
 
     def _format_scrape_data(self, scrape_data: Dict[str, Any]) -> str:
         """Format scraped profile data for Airtable display."""
