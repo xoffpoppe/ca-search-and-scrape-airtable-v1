@@ -1,11 +1,11 @@
 {
   "actorSpecification": 1,
   "name": "ca-search-and-scrape-airtable-v1",
-  "title": "CA Search and Scrape - Airtable Integration",
-  "description": "Searches Vistage CA database, scrapes member profiles, and writes results directly back to Airtable. No runtime limits!",
-  "version": "1.0.0",
+  "title": "CA Search and Scrape - Airtable Integration v1",
+  "description": "Searches Vistage/Salesforce for candidates, auto-scrapes high-confidence matches (≥70%), and writes results directly back to Airtable. Designed for seamless integration with Airtable automations.",
+  "version": "1.0",
   "meta": {
-    "templateId": "node-playwright"
+    "templateId": "python-playwright"
   },
   "input": "./input_schema.json",
   "dockerfile": "./Dockerfile"

@@ -1,79 +1,71 @@
 {
-  "title": "CA Search and Scrape - Airtable Integration",
-  "description": "Searches Vistage CA database, scrapes member profiles, and writes results directly back to Airtable. Designed for use with Airtable Automations.",
+  "title": "CA Search and Scrape - Airtable Integration v1",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
     "airtable_token": {
-      "title": "Airtable Personal Access Token",
+      "title": "Airtable API Token",
       "type": "string",
-      "description": "Your Airtable Personal Access Token with write access to the base. Create at: https://airtable.com/create/tokens",
+      "description": "Your Airtable Personal Access Token",
       "editor": "textfield",
       "isSecret": true
     },
     "airtable_base_id": {
       "title": "Airtable Base ID",
       "type": "string",
-      "description": "The ID of your Airtable base (starts with 'app'). Found in the URL when viewing your base.",
-      "editor": "textfield",
-      "pattern": "^app[a-zA-Z0-9]+$"
+      "description": "The base ID (starts with 'app')",
+      "editor": "textfield"
     },
     "airtable_table_name": {
       "title": "Airtable Table Name",
       "type": "string",
-      "description": "The name of the table to update",
+      "description": "Name of the table to update",
       "editor": "textfield",
       "default": "HubSpot Sync"
     },
     "record_id": {
       "title": "Airtable Record ID",
       "type": "string",
-      "description": "The ID of the record to update (passed from Airtable automation)",
+      "description": "The record ID to update with results",
       "editor": "textfield"
-    },
-    "vistage_username": {
-      "title": "Vistage Username",
-      "type": "string",
-      "description": "Your Vistage login email",
-      "editor": "textfield"
-    },
-    "vistage_password": {
-      "title": "Vistage Password",
-      "type": "string",
-      "description": "Your Vistage password",
-      "editor": "textfield",
-      "isSecret": true
     },
     "linkedin_slug": {
-      "title": "LinkedIn Profile Slug",
+      "title": "LinkedIn URL/Slug",
       "type": "string",
-      "description": "LinkedIn profile URL or slug (e.g., 'john-smith-123' or full URL)",
+      "description": "LinkedIn profile URL or slug (highest priority)",
       "editor": "textfield"
     },
     "domain": {
       "title": "Company Domain",
       "type": "string",
-      "description": "Company website domain (e.g., 'acme.com')",
+      "description": "Company domain (e.g., 'acme.com') - middle priority",
       "editor": "textfield"
     },
     "search_name": {
-      "title": "Person's Full Name",
+      "title": "Search Name",
       "type": "string",
-      "description": "Full name to search for (requires expected_company)",
+      "description": "Person's name to search for - fallback method",
       "editor": "textfield"
     },
     "expected_company": {
-      "title": "Expected Company Name",
+      "title": "Expected Company",
       "type": "string",
-      "description": "Company name to verify match against (required with search_name)",
+      "description": "Expected company name - used with search_name",
       "editor": "textfield"
     },
-    "auto_scrape": {
-      "title": "Auto-scrape high confidence matches",
-      "type": "boolean",
-      "description": "Automatically scrape full profile details for matches with ≥70% confidence",
-      "default": true,
-      "editor": "checkbox"
+    "vistage_username": {
+      "title": "Vistage Username",
+      "type": "string",
+      "description": "Your Vistage/Salesforce username",
+      "editor": "textfield",
+      "isSecret": false
+    },
+    "vistage_password": {
+      "title": "Vistage Password",
+      "type": "string",
+      "description": "Your Vistage/Salesforce password",
+      "editor": "textfield",
+      "isSecret": true
     }
   },
   "required": ["airtable_token", "airtable_base_id", "record_id", "vistage_username", "vistage_password"]

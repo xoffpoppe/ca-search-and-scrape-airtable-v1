@@ -1,0 +1,112 @@
+# PROPOSED CA STATUS RULES
+# Rules are evaluated in ORDER from top to bottom - FIRST matching rule wins
+# 
+# AVAILABLE FIELD NAMES (use these exact names in conditions):
+#   - ca name
+#   - ca company  
+#   - ca phone
+#   - ca mobile
+#   - ca email
+#   - ca url
+#   - lead source
+#   - ca role
+#   - ca vistage role
+#   - ca contact status
+#   - opt in
+#   - available
+#   - ca availability
+#   - ca details
+#   - ca stage
+#   - opportunity close date
+#   - days untouched
+#   - chair rep
+#   - reason
+#
+# SUPPORTED OPERATORS:
+#   - equals: exact match (case-sensitive)
+#   - contains: partial match (case-insensitive)
+#   - days_ago_less_than: date is within X days from today
+#   - days_ago_more_than: date is older than X days from today
+#   - is_null: field is null/None/empty
+#   - is_not_null: field has a value
+
+rules:
+  - name: "Reserved by Me"
+    conditions:
+      - field: "chair rep"
+        operator: "contains"
+        value: "Christoff Poppe"
+    result: "Reserved"
+
+  - name: "Member"
+    conditions:
+      - field: "ca vistage role"
+        operator: "equals"
+        value: "Member"
+    result: "Member"
+  - name: "Ex-Member"
+    conditions:
+      - field: "ca vistage role"
+        operator: "equals"
+        value: "Ex-Member"
+    result: "Ex-Member"
+  - name: "Not Available - Red Flag"
+    conditions:
+      - field: "opt in"
+        operator: "contains"
+        value: "Red"
+    result: "Not Available - Red"
+    
+  - name: "Not Available - Yellow Flag"
+    conditions:
+      - field: "opt in"
+        operator: "contains"
+        value: "opted out"
+    result: "Not Available - Yellow"
+  - name: "Taken"
+    conditions:
+      - field: "ca availability"
+        operator: "equals"
+        value: "Taken"
+    result: "Taken"
+  - name: "Bad Email"
+    conditions:
+      - field: "opt in"
+        operator: "contains"
+        value: "has bad email"
+    result: "Available - Bad CA Email"
+  - name: "Available and Green"
+    conditions:
+      - field: "available"
+        operator: "contains"
+        value: "Yes"
+      - field: "opt in"
+        operator: "contains"
+        value: "Green"
+    result: "Available"
+  - name: "CA Available and Green"
+    conditions:
+      - field: "ca availability"
+        operator: "equals"
+        value: "Available"
+      - field: "opt in"
+        operator: "contains"
+        value: "Green"
+    result: "Available"
+  - name: "Not Interested Recently"
+    conditions:
+      - field: "ca availability"
+        operator: "equals"
+        value: "Available"
+      - field: "reason"
+        operator: "contains"
+        value: "Not interested"
+      - field: "opportunity close date"
+        operator: "days_ago_less_than"
+        value: 365
+    result: "Not interested"
+    
+  # Default fallback if no rules match
+  - name: "Unknown Status"
+    conditions: []
+    result: ""
