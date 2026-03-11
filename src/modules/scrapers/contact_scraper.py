@@ -79,8 +79,14 @@ async def scrape_contact_details(page, contact_url: str, logger) -> dict:
         
         logger.info(f'Navigating to: {opportunities_url}')
         await page.goto(opportunities_url, wait_until='domcontentloaded')
-        await page.wait_for_timeout(3000)
-        
+
+        # Wait for table rows to render (Lightning components load async)
+        try:
+            await page.wait_for_selector('tbody tr', timeout=15000)
+            logger.info('Opportunity table rows detected')
+        except Exception:
+            logger.info('No opportunity table rows appeared within 15s')
+
         # Scrape opportunities - Opportunity is in <th>, other fields in <td>
         try:
             rows = await page.query_selector_all('tbody tr')
