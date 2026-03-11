@@ -79,6 +79,17 @@ class AirtableWriter:
                 if ca_status:
                     fields['CA Possible Status'] = ca_status
 
+                # Write contact fields only if opt-in is Green
+                scrape_data = result.get('scrape_data', {})
+                opt_in = scrape_data.get('opt in', '') or ''
+                if opt_in.startswith('Green'):
+                    if scrape_data.get('ca email'):
+                        fields['CA Email'] = scrape_data['ca email']
+                    if scrape_data.get('ca phone'):
+                        fields['CA Phone'] = scrape_data['ca phone']
+                    if scrape_data.get('ca mobile'):
+                        fields['CA Mobile'] = scrape_data['ca mobile']
+
         await self.update_record(fields)
 
     async def write_error(self, error_message: str) -> None:
@@ -177,60 +188,52 @@ class AirtableWriter:
         formatted = ''
 
         # Basic info
-        formatted += f'Full Name: {scrape_data.get("full_name", "N/A")}\n'
-        if scrape_data.get('preferred_name'):
-            formatted += f'Preferred Name: {scrape_data["preferred_name"]}\n'
-        formatted += f'Company: {scrape_data.get("company_name", "N/A")}\n'
-        formatted += f'Title: {scrape_data.get("title", "N/A")}\n'
+        formatted += f'Name: {scrape_data.get("ca name", "N/A")}\n'
+        formatted += f'Company: {scrape_data.get("ca company", "N/A")}\n'
+        formatted += f'Role: {scrape_data.get("ca role", "N/A")}\n'
 
         # Contact info
-        if scrape_data.get('email'):
-            formatted += f'Email: {scrape_data["email"]}\n'
-        if scrape_data.get('phone'):
-            formatted += f'Phone: {scrape_data["phone"]}\n'
+        if scrape_data.get('ca email'):
+            formatted += f'Email: {scrape_data["ca email"]}\n'
+        if scrape_data.get('ca phone'):
+            formatted += f'Phone: {scrape_data["ca phone"]}\n'
+        if scrape_data.get('ca mobile'):
+            formatted += f'Mobile: {scrape_data["ca mobile"]}\n'
 
-        # Location
-        city = scrape_data.get('city', '')
-        state = scrape_data.get('state', '')
-        if city or state:
-            formatted += f'Location: {city}, {state}\n'
+        # Status fields
+        if scrape_data.get('ca vistage role'):
+            formatted += f'Vistage Role: {scrape_data["ca vistage role"]}\n'
+        if scrape_data.get('ca contact status'):
+            formatted += f'Contact Status: {scrape_data["ca contact status"]}\n'
+        if scrape_data.get('lead source'):
+            formatted += f'Lead Source: {scrape_data["lead source"]}\n'
+        if scrape_data.get('opt in'):
+            formatted += f'Opt In: {scrape_data["opt in"]}\n'
 
-        # LinkedIn
-        if scrape_data.get('linkedin_url'):
-            formatted += f'LinkedIn: {scrape_data["linkedin_url"]}\n'
+        # Availability
+        if scrape_data.get('available'):
+            formatted += f'Available: {scrape_data["available"]}\n'
+        if scrape_data.get('ca availability'):
+            formatted += f'CA Availability: {scrape_data["ca availability"]}\n'
 
-        # Membership details
-        if scrape_data.get('member_since'):
-            formatted += f'Member Since: {scrape_data["member_since"]}\n'
-        if scrape_data.get('group_name'):
-            formatted += f'Group: {scrape_data["group_name"]}\n'
-        if scrape_data.get('chair_name'):
-            formatted += f'Chair: {scrape_data["chair_name"]}\n'
+        # Opportunity details
+        if scrape_data.get('ca stage'):
+            formatted += f'Stage: {scrape_data["ca stage"]}\n'
+        if scrape_data.get('opportunity close date'):
+            formatted += f'Close Date: {scrape_data["opportunity close date"]}\n'
+        if scrape_data.get('days untouched'):
+            formatted += f'Days Untouched: {scrape_data["days untouched"]}\n'
+        if scrape_data.get('chair rep'):
+            formatted += f'Chair Rep: {scrape_data["chair rep"]}\n'
+        if scrape_data.get('reason'):
+            formatted += f'Reason: {scrape_data["reason"]}\n'
 
-        # Company details
-        if scrape_data.get('company_revenue'):
-            formatted += f'Company Revenue: {scrape_data["company_revenue"]}\n'
-        if scrape_data.get('company_employees'):
-            formatted += f'Employees: {scrape_data["company_employees"]}\n'
-        if scrape_data.get('industry'):
-            formatted += f'Industry: {scrape_data["industry"]}\n'
+        # Details
+        if scrape_data.get('ca details'):
+            formatted += f'\n{scrape_data["ca details"]}\n'
 
-        # Bio
-        if scrape_data.get('bio'):
-            formatted += f'\nBio:\n{scrape_data["bio"]}\n'
-
-        # Professional highlights
-        highlights = scrape_data.get('professional_highlights', [])
-        if highlights:
-            formatted += '\nProfessional Highlights:\n'
-            for h in highlights:
-                formatted += f'• {h}\n'
-
-        # Education
-        education = scrape_data.get('education', [])
-        if education:
-            formatted += '\nEducation:\n'
-            for e in education:
-                formatted += f'• {e}\n'
+        # Proposed status
+        if scrape_data.get('proposed ca status'):
+            formatted += f'\nProposed CA Status: {scrape_data["proposed ca status"]}\n'
 
         return formatted
